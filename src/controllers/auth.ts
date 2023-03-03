@@ -1,13 +1,10 @@
 import { Request, Response } from 'express';
 const User = require('../models/User');
 const yup = require('yup');
+const { yupValidation } = require('../utils/YupValidation');
 const bcrypt = require('bcryptjs');
 
 exports.register = async (req: Request, res: Response) => {
-    if (false) {
-        console.log(req);
-    }
-
     const { username, email, password } = req.body;
     try {
         const passwordHashed = await bcrypt.hash(password, 10);
@@ -30,14 +27,9 @@ exports.login = async (req: Request, res: Response) => {
         email: yup.string().email().required(),
         password: yup.string().required(),
     });
-    const validation = async (obj: object) => {
-        try {
-            await authSchema.validate(obj);
-        } catch (error: any) {
-            return res.status(500).json({ success: false, error: error.message });
-        }
-    };
-    validation({ email, password });
+
+    const bodyValidation = await yupValidation(authSchema, { email, password });
+    if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
