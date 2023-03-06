@@ -1,7 +1,10 @@
-const exxpress = require('express');
-const roouter = exxpress.Router();
-const QuotesController = require('../controllers/QuotesController');
+import express from 'express';
+const router = express.Router();
+import { createQuote, getSingleQuote, getLatestQuotes, getPopulaireQuotes } from '../controllers/QuotesController';
 
-router.post('/', QuotesController);
+router.post('/', createQuote);
+router.get('/', getPopulaireQuotes);
+router.get('/latest', getLatestQuotes);
+router.get('/:id', getSingleQuote);
 
-module.exports = roouter;
+export default router;

@@ -1,16 +1,17 @@
+import express, { Request, Response, NextFunction } from 'express';
 const dotenv = require('dotenv');
 dotenv.config();
-import express, { Request, Response, NextFunction } from 'express';
-const bodyParser = require('body-parser');
 const connectDB = require('./config/db');
+import bodyParser from 'body-parser';
+const authRoutes = require('./routes/auth');
+import quoteRoutes from './routes/quote';
 connectDB();
 const app = express();
 const port = process.env.PORT || '5000';
-app.use(bodyParser.urlencoded({ extendd: false }));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// const routes = require('./routes/auth');
-app.use('/api/auth', require('./routes/quote'));
-app.use('/api/quotes', require('./routes/quote'));
+app.use('/api/auth', authRoutes);
+app.use('/api/quotes', quoteRoutes);
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (false) {

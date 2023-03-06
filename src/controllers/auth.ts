@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 const User = require('../models/User');
-const authSchema = require('../utils/YupValidation');
-const { yupValidation } = require('../utils/YupValidation');
+import { yupValidation, authSchema } from '../utils/YupValidation';
 const bcrypt = require('bcryptjs');
 
-exports.register = async (req: Request, res: Response) => {
+const register = async (req: Request, res: Response) => {
     const { username, email, password } = req.body;
     try {
         const passwordHashed = await bcrypt.hash(password, 10);
@@ -21,7 +20,7 @@ exports.register = async (req: Request, res: Response) => {
     }
     res.send('register');
 };
-exports.login = async (req: Request, res: Response) => {
+const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const bodyValidation = await yupValidation(authSchema, { email, password });
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
@@ -44,3 +43,4 @@ exports.login = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+export { login, register };

@@ -1,5 +1,4 @@
 import { Schema, model } from 'mongoose';
-
 interface User {
     username: string;
     email: string;
