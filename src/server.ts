@@ -8,8 +8,9 @@ const app = express();
 const port = process.env.PORT || '5000';
 app.use(bodyParser.urlencoded({ extendd: false }));
 app.use(bodyParser.json());
-const routes = require('./routes/auth');
-app.use('/api/auth', routes);
+// const routes = require('./routes/auth');
+app.use('/api/auth', require('./routes/quote'));
+app.use('/api/quotes', require('./routes/quote'));
 
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (false) {

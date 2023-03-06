@@ -1,14 +1,16 @@
+import { timeStamp } from 'console';
 import { Schema, model } from 'mongoose';
 
 interface Quote {
     content: string;
     author: string;
-    NumberReact: number;
-    NumberComment: number;
-    QuoteTags: any;
-    DateCreation: Date;
+    likes: string[];
+    tags: any;
 }
-const UserSchema = new Schema<Quote>({
+interface tag {
+    name: string;
+}
+const QuoteSchema = new Schema<Quote>({
     content: {
         type: String,
         required: [true, 'please provide a content'],
@@ -17,15 +19,28 @@ const UserSchema = new Schema<Quote>({
         type: String,
         required: [true, 'please provide the author'],
     },
-    NumberReact: String,
-    NumberComment: String,
-    QuoteTags: {
-        type: Schema.Types.ObjectId,
-        ref: 'QuoteTags',
+    likes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user',
+        },
+    ],
+    tags: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'tag',
+        },
+    ],
+});
+const TagSchema = new Schema<tag>({
+    name: {
+        type: String,
+        unique: true,
+        required: true,
     },
-    DateCreation: Date,
 });
 
-const quote = model('Quote', UserSchema);
+const Quote = model('Quote', QuoteSchema);
+const Tag = model('Tag', TagSchema);
 
-module.exports = quote;
+module.exports = { Quote, Tag };
