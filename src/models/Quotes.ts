@@ -19,13 +19,13 @@ const QuoteSchema = new Schema<Quote>(
         likes: [
             {
                 type: Schema.Types.ObjectId,
-                ref: 'user',
+                ref: 'User',
             },
         ],
         tags: [
             {
                 type: Schema.Types.ObjectId,
-                ref: 'tag',
+                ref: 'Tag',
             },
         ],
     },

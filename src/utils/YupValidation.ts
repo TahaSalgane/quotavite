@@ -15,7 +15,7 @@ const authSchema = yup.object({
 const quoteSchema = yup.object({
     content: yup.string().required(),
     author: yup.string().required(),
-    QuoteTags: yup.string().required(),
+    tags: yup.array().of(yup.string()).required(),
 });
 export default yupValidation;
 export { authSchema, quoteSchema, yupValidation };

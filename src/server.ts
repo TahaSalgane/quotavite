@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 import bodyParser from 'body-parser';
 const authRoutes = require('./routes/auth');
 import quoteRoutes from './routes/quote';
+const tags = require('./models/Tag');
 connectDB();
 const app = express();
 const port = process.env.PORT || '5000';
@@ -12,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/quotes', quoteRoutes);
-
+console.log(tags);
 app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     if (false) {
         console.log(req, res, next);

@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import Quote from '../models/Quotes';
 import { yupValidation, quoteSchema } from '../utils/YupValidation';
 const createQuote = async (req: Request, res: Response) => {
-    const { content, author, QuoteTags } = req.body;
-    const bodyValidation = await yupValidation(quoteSchema, { content, author, QuoteTags });
+    const { content, author, tags } = req.body;
+    const bodyValidation = await yupValidation(quoteSchema, { content, author, tags });
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
-        const quote = await Quote.create({ content, author, QuoteTags });
+        const quote = await Quote.create({ content, author, tags });
         return res.status(201).json({ success: true, quote });
     } catch (error: any) {
         return res.status(500).json({ success: false, error: error.message });
@@ -46,7 +46,7 @@ const getLatestQuotes = async (req: Request, res: Response) => {
         } else if (tag) {
             quotes = await Quote.find({ tags: tag }).sort({ createdAt: -1 });
         } else {
-            quotes = await Quote.find({}).sort({ createdAt: -1 });
+            quotes = await Quote.find({}).sort({ createdAt: -1 }).populate('tags');
         }
         res.status(200).json(quotes);
     } catch (error: any) {
