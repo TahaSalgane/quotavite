@@ -5,4 +5,4 @@ import { login, register } from '../controllers/auth';
 router.get('/register', register);
 router.get('/login', login);
 
-module.exports = router;
+export default router;

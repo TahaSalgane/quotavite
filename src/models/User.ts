@@ -5,6 +5,7 @@ interface User {
     password: string;
     resetPasswordToken: string;
     resetPasswordExpire: Date;
+    status: number;
 }
 const UserSchema = new Schema<User>({
     username: {
@@ -23,8 +24,12 @@ const UserSchema = new Schema<User>({
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+    status: {
+        type: Number,
+        default: 1,
+    },
 });
 
-const user = model('User', UserSchema);
+const User = model('User', UserSchema);
 
-module.exports = user;
+export default User;

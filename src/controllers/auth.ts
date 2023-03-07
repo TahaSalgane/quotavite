@@ -18,7 +18,6 @@ const register = async (req: Request, res: Response) => {
             error: error.message,
         });
     }
-    res.send('register');
 };
 const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;

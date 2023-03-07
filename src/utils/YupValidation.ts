@@ -17,5 +17,8 @@ const quoteSchema = yup.object({
     author: yup.string().required(),
     tags: yup.array().of(yup.string()).required(),
 });
+const categorieSchema = yup.object({
+    name: yup.string().required(),
+});
 export default yupValidation;
-export { authSchema, quoteSchema, yupValidation };
+export { authSchema, quoteSchema, categorieSchema, yupValidation };
