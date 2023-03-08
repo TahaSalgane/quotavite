@@ -20,11 +20,12 @@
     "author": "A.Mhiri",
     "license": "ISC",
     "dependencies": {
+        "@types/cors": "^2.8.13",
         "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
         "dotenv": "^16.0.3",
         "express": "^4.18.2",
         "mongoose": "^7.0.0",
-        "mongoose-typescript": "^2.3.3",
         "yup": "^1.0.2"
     },
     "devDependencies": {

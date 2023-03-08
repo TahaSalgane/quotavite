@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 const dotenv = require('dotenv');
+import cors from 'cors';
 dotenv.config();
 const connectDB = require('./config/db');
 import bodyParser from 'body-parser';
@@ -8,8 +9,18 @@ import quoteRoutes from './routes/quote';
 import tags from './routes/tags';
 import users from './routes/users';
 connectDB();
+// Set Headers using CORS instead of codding all headers manually
+const corsOptionsDelegate = (req: Request, callback: any) => {
+    let corsOptions = {};
+    corsOptions = {
+        ...corsOptions,
+        allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Authorization', 'Accept'],
+    };
+    callback(null, corsOptions); // callback expects two parameters: error and options
+};
 const app = express();
 const port = process.env.PORT || '5000';
+app.use(cors(corsOptionsDelegate));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
