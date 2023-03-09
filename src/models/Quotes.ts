@@ -4,6 +4,7 @@ interface Quote {
     author: string;
     likes: string[];
     tags: any;
+    likes_count: number;
 }
 
 const QuoteSchema = new Schema<Quote>(

@@ -20,13 +20,15 @@ const getPopulaireQuotes = async (req: Request, res: Response) => {
     try {
         if (pageNumber) {
             quotes = await Quote.find()
+                .populate('tags')
+                .populate('likes')
                 .skip((+pageNumber - 1) * PER_PAGE)
                 .limit(PER_PAGE)
                 .sort({ like: 1 });
         } else if (tag) {
-            quotes = await Quote.find({ tags: tag }).sort({ like: 1 });
+            quotes = await Quote.find({ tags: tag }).populate('tags').populate('likes').sort({ like: 1 });
         } else {
-            quotes = await Quote.find({}).sort({ like: 1 });
+            quotes = await Quote.find({}).populate('tags').populate('likes').sort({ like: 1 });
         }
         res.status(200).json(quotes);
     } catch (error: any) {
