@@ -7,7 +7,7 @@ const createQuote = async (req: Request, res: Response) => {
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
         const quote = await Quote.create({ content, author, tags });
-        return res.status(201).json({ success: true, quote });
+        return res.status(201).json({ success: true, realData: quote });
     } catch (error: any) {
         return res.status(500).json({ success: false, error: error.message });
     }

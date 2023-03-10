@@ -6,8 +6,8 @@ const createTag = async (req: Request, res: Response) => {
     const bodyValidation = await yupValidation(categorieSchema, { name });
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
-        const tags = await Tag.create({ name });
-        return res.status(201).json({ success: true, tags });
+        const tag = await Tag.create({ name });
+        return res.status(201).json({ success: true, realData: tag });
     } catch (error: any) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -44,19 +44,21 @@ const deleteTag = async (req: Request, res: Response) => {
             return res.status(404).json({ success: false, message: 'tag not found' });
         }
         await Tag.findByIdAndDelete(req.params.id);
-        res.status(200).json({ success: true, message: 'tag has been deleted successfully' });
+        res.status(200).json({ success: true, realData: tag, message: 'tag has been deleted successfully' });
     } catch (error: any) {
         res.status(403).json({ success: false, message: error.message });
     }
 };
 const updateTag = async (req: Request, res: Response) => {
+    const { name } = req.body;
+    const bodyValidation = await yupValidation(categorieSchema, { name });
+    if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
+
     const tag = await Tag.findById(req.params.id);
     if (!tag) {
         return res.status(404).json({ success: false, message: 'quote not found' });
     }
-    const { name } = req.body;
-    const bodyValidation = await yupValidation(categorieSchema, { name });
-    if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
+
     try {
         const tag = await Tag.findByIdAndUpdate(
             req.params.id,
