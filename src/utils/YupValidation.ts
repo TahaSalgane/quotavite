@@ -15,8 +15,8 @@ const authSchema = yup.object({
 const quoteSchema = yup.object({
     content: yup.string().required(),
     author: yup.string().required(),
-    // tags: yup.array().of(yup.string()).required(),
-    tags: yup.string().required(),
+    tags: yup.array().of(yup.string()).required(),
+    // tags: yup.string().required(),
 });
 const categorieSchema = yup.object({
     name: yup.string().required(),
