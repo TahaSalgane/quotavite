@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const connectDB = async () => {
+    const url = process.env.MONGO_URI ?? '';
     mongoose.set('strictQuery', false);
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(url);
     console.log('mongo connected');
 };
-module.exports = connectDB;
+export default connectDB;

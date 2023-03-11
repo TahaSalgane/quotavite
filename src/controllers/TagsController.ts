@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Tag from '../models/Tags';
 import { yupValidation, categorieSchema } from '../utils/YupValidation';
+import { CostumeRequest } from '../utils/type';
 const createTag = async (req: Request, res: Response) => {
     const { name } = req.body;
     const bodyValidation = await yupValidation(categorieSchema, { name });
@@ -15,6 +16,7 @@ const createTag = async (req: Request, res: Response) => {
 
 const getAllTag = async (req: Request, res: Response) => {
     try {
+        console.log((req as CostumeRequest).userData);
         const tags = await Tag.find();
         if (tags) {
             res.status(200).json(tags);

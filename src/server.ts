@@ -1,8 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express';
-const dotenv = require('dotenv');
+import express, { Request, Response } from 'express';
+// import { ResponseError } from './utils/type';
+import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
-const connectDB = require('./config/db');
+import connectDB from './config/db';
 import bodyParser from 'body-parser';
 import authRoutes from './routes/auth';
 import quoteRoutes from './routes/quote';
@@ -27,11 +28,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/tags', tags);
 app.use('/api/users', users);
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-    if (false) {
-        console.log(req, res, next);
-    }
-    console.log(error);
+
+app.use((err: Error, req: Request, res: Response) => {
+    console.log('Middleware Error Hadnling');
+    // const errStatus = (err as ResponseError).statusCode || 500;
+    const errMsg = err.message || 'Something went wrong';
+    res.status(500).json({
+        success: false,
+        message: errMsg,
+    });
 });
 
 app.listen(port, () => {
