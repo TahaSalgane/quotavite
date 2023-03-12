@@ -6,6 +6,7 @@ interface UserInterface {
     resetPasswordToken: string;
     resetPasswordExpire: Date;
     status: number;
+    isAdmin: boolean;
 }
 const UserSchema = new Schema<UserInterface>({
     username: {
@@ -21,6 +22,10 @@ const UserSchema = new Schema<UserInterface>({
         require: [true, 'please add a password'],
         minlength: 6,
         select: false,
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false,
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

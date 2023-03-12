@@ -3,6 +3,7 @@ import User from '../models/User';
 import { yupValidation, authSchema } from '../utils/YupValidation';
 import jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
+import { UserDataInterface } from '../utils/type';
 
 const secret = process.env.SECRET_OR_KEY_JWT ?? '';
 
@@ -37,7 +38,13 @@ const login = async (req: Request, res: Response) => {
                 return res.status(400).json({ success: false, message: 'invalid credentials' });
             }
             if (ismatch) {
-                const token = jwt.sign({ _id: user._id, username: user.username, email: user.email }, secret, {
+                const userData = {
+                    _id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    isAdmin: user.isAdmin,
+                } as UserDataInterface;
+                const token = jwt.sign(userData, secret, {
                     expiresIn: '1h',
                 });
 

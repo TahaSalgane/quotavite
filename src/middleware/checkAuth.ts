@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
-import { ResponseError, CostumeRequest, UserData } from '../utils/type';
+import { ResponseError, CostumeRequest, UserDataInterface } from '../utils/type';
 dotenv.config();
 const secret = process.env.SECRET_OR_KEY_JWT ?? '';
 const AuthChecker = (req: Request, res: Response, next: NextFunction) => {
@@ -26,9 +26,10 @@ const AuthChecker = (req: Request, res: Response, next: NextFunction) => {
         throw error;
     }
     (req as CostumeRequest).userData = {
-        _id: (decodedToken as UserData)._id,
-        email: (decodedToken as UserData).email,
-        username: (decodedToken as UserData).username,
+        _id: (decodedToken as UserDataInterface)._id,
+        email: (decodedToken as UserDataInterface).email,
+        username: (decodedToken as UserDataInterface).username,
+        isAdmin: (decodedToken as UserDataInterface).isAdmin,
     };
     next();
 };
