@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import Tag from '../models/Tags';
 import { yupValidation, categorieSchema } from '../utils/YupValidation';
+import { CostumeRequest } from '../utils/type';
 const createTag = async (req: Request, res: Response) => {
     const { name } = req.body;
     const bodyValidation = await yupValidation(categorieSchema, { name });
@@ -13,16 +14,21 @@ const createTag = async (req: Request, res: Response) => {
     }
 };
 
-const getAllTag = async (req: Request, res: Response) => {
+const getAllTag = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log((req as CostumeRequest).userData);
         const tags = await Tag.find();
         if (tags) {
             res.status(200).json(tags);
         } else {
             res.status(403).json({ success: false, message: 'there is a problem' });
         }
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+    } catch (err: any) {
+        // res.status(403).json({ success: false, message: err.message });
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
     }
 };
 const getSingleTag = async (req: Request, res: Response) => {

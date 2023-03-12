@@ -1,5 +1,5 @@
 import { ObjectSchema } from 'yup';
-const yup = require('yup');
+import * as yup from 'yup';
 const yupValidation = async (schema: ObjectSchema<object>, obj: object) => {
     try {
         await schema.validate(obj);

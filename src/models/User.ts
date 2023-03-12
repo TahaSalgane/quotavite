@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-interface User {
+interface UserInterface {
     username: string;
     email: string;
     password: string;
@@ -7,7 +7,7 @@ interface User {
     resetPasswordExpire: Date;
     status: number;
 }
-const UserSchema = new Schema<User>({
+const UserSchema = new Schema<UserInterface>({
     username: {
         type: String,
         required: [true, 'please provide a username'],
