@@ -4,6 +4,7 @@ import { yupValidation, authSchema } from '../utils/YupValidation';
 import jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { ResponseError, UserDataInterface } from '../utils/type';
+import responseData from '../utils/responseData';
 
 const secret = process.env.SECRET_OR_KEY_JWT ?? '';
 
@@ -51,10 +52,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                     isAdmin: user.isAdmin,
                 } as UserDataInterface;
                 const token = jwt.sign(userData, secret, {
+                    // expiresIn: '1s',
                     expiresIn: '1h',
                 });
-
-                return res.status(200).json({ success: true, realData: token });
+                return responseData(res, true, 200, null, token);
+                // return res.status(200).json({ success: true, realData: token });
             } else {
                 return res.status(400).json({ success: false, message: 'invalid credentials' });
             }
