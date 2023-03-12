@@ -7,7 +7,8 @@ const createQuote = async (req: Request, res: Response) => {
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
         const quote = await Quote.create({ content, author, tags });
-        return res.status(201).json({ success: true, realData: quote });
+        const freshQuote = await Quote.findById(quote._id).populate('tags').populate('likes');
+        return res.status(201).json({ success: true, realData: freshQuote });
     } catch (error: any) {
         return res.status(500).json({ success: false, error: error.message });
     }
@@ -88,18 +89,12 @@ const updateQuote = async (req: Request, res: Response) => {
     const bodyValidation = await yupValidation(quoteSchema, { content, author, tags });
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
-        const quote = await Quote.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: {
-                    content,
-                    author,
-                    tags,
-                },
-            },
-            { new: true },
-        );
-        return res.status(201).json({ success: true, quote });
+        quote.content = content;
+        quote.author = author;
+        quote.tags = tags;
+        await quote.save();
+        const freshQuote = await Quote.findById(quote._id).populate('tags').populate('likes');
+        return res.status(201).json({ success: true, realData: freshQuote });
     } catch (error: any) {
         return res.status(500).json({ success: false, error: error.message });
     }
