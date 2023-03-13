@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import Quote from '../models/Quotes';
+import responseData from '../utils/responseData';
+import { CostumeRequest } from '../utils/type';
 import { yupValidation, quoteSchema } from '../utils/YupValidation';
 const createQuote = async (req: Request, res: Response) => {
     const { content, author, tags } = req.body;
@@ -101,31 +103,25 @@ const updateQuote = async (req: Request, res: Response) => {
 };
 
 const toggleLike = async (req: Request, res: Response) => {
-    let quote = await Quote.findById(req.params.id);
-    if (!quote) {
-        return res.status(500).json({ success: false, message: 'quote not found' });
-    }
-    const userID = '640713c5259c37297e284af7';
-    const isquoteliked = quote.likes.find((user: number) => user.toString() === userID);
+    const { id } = req.params;
+    const userData = (req as CostumeRequest).userData;
+    const userID = userData._id;
     try {
-        if (isquoteliked) {
-            quote = await Quote.findByIdAndUpdate(
-                req.params.id,
-                {
-                    $pull: { likes: userID },
-                },
-                { new: true },
-            );
-        } else {
-            quote = await Quote.findByIdAndUpdate(
-                req.params.id,
-                {
-                    $push: { likes: userID },
-                },
-                { new: true },
-            );
+        const quote = await Quote.findById(id);
+        if (!quote) {
+            return res.status(500).json({ success: false, message: 'quote not found' });
         }
-        return res.status(200).json({ success: true, message: quote });
+        const qupteUpdateData = quote.likes.find((user: number) => user.toString() === userID)
+            ? {
+                  $pull: { likes: userData._id },
+              }
+            : {
+                  $push: { likes: userID },
+              };
+        await Quote.findByIdAndUpdate(req.params.id, qupteUpdateData, { new: true });
+        const freshQuote = await Quote.findById(quote._id).populate('tags').populate('likes');
+
+        return responseData(res, true, 200, null, freshQuote);
     } catch (error: any) {
         return res.status(500).json({ success: false, error: error.message });
     }
