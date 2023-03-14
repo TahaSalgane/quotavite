@@ -47,11 +47,13 @@ const getLatestQuotes = async (req: Request, res: Response) => {
             quotes = await Quote.find()
                 .skip((-pageNumber - 1) * PER_PAGE)
                 .limit(PER_PAGE)
+                .populate('tags')
+                .populate('likes')
                 .sort({ createdAt: -1 });
         } else if (tag) {
-            quotes = await Quote.find({ tags: tag }).sort({ createdAt: -1 });
+            quotes = await Quote.find({ tags: tag }).sort({ createdAt: -1 }).populate('tags').populate('likes');
         } else {
-            quotes = await Quote.find({}).sort({ createdAt: -1 }).populate('tags');
+            quotes = await Quote.find({}).sort({ createdAt: -1 }).populate('tags').populate('likes');
         }
         res.status(200).json(quotes);
     } catch (error: any) {

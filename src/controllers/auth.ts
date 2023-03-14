@@ -16,6 +16,18 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         //     (error as ResponseError).statusCode = 500;
         //     throw error;
         // }
+        const checkEmail = await User.findOne({ email: email });
+        const checUsername = await User.findOne({ username: username });
+        if (checkEmail) {
+            const error = new Error('email already exists');
+            (error as ResponseError).statusCode = 400;
+            throw error;
+        }
+        if (checUsername) {
+            const error = new Error('username already exists');
+            (error as ResponseError).statusCode = 400;
+            throw error;
+        }
         const passwordHashed = await bcrypt.hash(password, 10);
         const user = await User.create({ username, email, password: passwordHashed });
         res.status(201).json({
