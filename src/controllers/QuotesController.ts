@@ -1,4 +1,8 @@
 import { Request, Response } from 'express';
+
+import { load } from 'cheerio';
+import axios, { AxiosResponse } from 'axios';
+import cron from 'node-cron';
 import Quote from '../models/Quotes';
 import responseData from '../utils/responseData';
 import { CostumeRequest } from '../utils/type';
@@ -128,5 +132,41 @@ const toggleLike = async (req: Request, res: Response) => {
         return res.status(500).json({ success: false, error: error.message });
     }
 };
+const webSrapper = async (req: Request, res: Response) => {
+    try {
+        const url = 'https://www.brainyquote.com/topics/love-quotes';
+        axios
+            .get(url)
+            .then((response: AxiosResponse) => {
+                const cheerioLad = load(response.data);
+                const quotes: any[] = [];
 
-export { createQuote, getSingleQuote, getLatestQuotes, getPopulaireQuotes, deleteQuote, updateQuote, toggleLike };
+                cheerioLad('.bqQt').each((i: number, el: any) => {
+                    const quote = cheerioLad(el).find('.b-qt').text().trim();
+                    const author = cheerioLad(el).find('.bq-aut').text();
+                    console.log(author);
+                    quotes.push({ quote, author });
+                });
+                cron.schedule('1 * * * * *', () => {
+                    console.log(quotes);
+                });
+            })
+            .catch((error: Error) => {
+                console.log(error);
+            });
+        return responseData(res, true, 200, null, null);
+    } catch (error: any) {
+        return res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export {
+    createQuote,
+    getSingleQuote,
+    getLatestQuotes,
+    getPopulaireQuotes,
+    deleteQuote,
+    updateQuote,
+    toggleLike,
+    webSrapper,
+};
