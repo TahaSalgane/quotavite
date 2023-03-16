@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { fork } from 'child_process';
-import { scrappAndInsertQuotes } from '../config/ScrapeQuotes';
+import { brainQuoteWebScrapper } from '../webScrapper/index';
 
 const fokeProcess = () => {
     const childPath = path.resolve(__dirname + '/callProcess.js');
@@ -11,7 +11,7 @@ const fokeProcess = () => {
         if (message === 'scrapper') {
             console.log('******************** scapper start ********************');
             //
-            await scrappAndInsertQuotes();
+            await brainQuoteWebScrapper('love');
             //
             console.log('******************** scapper  end  ********************');
         }

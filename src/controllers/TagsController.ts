@@ -1,16 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import Tag from '../models/Tags';
-import { yupValidation, categorieSchema } from '../utils/YupValidation';
-import { CostumeRequest } from '../utils/type';
-const createTag = async (req: Request, res: Response) => {
+import { yupValidation, tagSchema } from '../utils/YupValidation';
+import { CostumeRequest, ResponseError } from '../utils/type';
+import responseData from '../utils/responseData';
+
+const createTag = async (req: Request, res: Response, next: NextFunction) => {
     const { name } = req.body;
-    const bodyValidation = await yupValidation(categorieSchema, { name });
-    if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
+    const bodyValidation = await yupValidation(tagSchema, { name });
+    if (!bodyValidation.ok) {
+        const error = new Error(bodyValidation.error.message);
+        (error as ResponseError).statusCode = 400;
+        throw error;
+    }
     try {
         const tag = await Tag.create({ name });
-        return res.status(201).json({ success: true, realData: tag });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        return responseData(res, true, 200, null, tag);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 
@@ -19,50 +25,54 @@ const getAllTag = async (req: Request, res: Response, next: NextFunction) => {
         console.log((req as CostumeRequest).userData);
         const tags = await Tag.find();
         if (tags) {
-            res.status(200).json(tags);
+            return responseData(res, true, 200, null, tags);
         } else {
-            res.status(403).json({ success: false, message: 'there is a problem' });
+            const error = new Error('tags not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
-    } catch (err: any) {
-        // res.status(403).json({ success: false, message: err.message });
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const getSingleTag = async (req: Request, res: Response) => {
+const getSingleTag = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const tag = await Tag.findById(req.params.id);
         if (!tag) {
-            res.status(403).json({ success: false, message: 'tag not found' });
+            const error = new Error('tag not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
-        res.status(200).json(tag);
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, tag);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 
-const deleteTag = async (req: Request, res: Response) => {
+const deleteTag = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const tag = await Tag.findById(req.params.id);
         if (!tag) {
-            return res.status(404).json({ success: false, message: 'tag not found' });
+            const error = new Error('tag not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
         await Tag.findByIdAndDelete(req.params.id);
-        res.status(200).json({ success: true, realData: tag, message: 'tag has been deleted successfully' });
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, tag);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const updateTag = async (req: Request, res: Response) => {
+const updateTag = async (req: Request, res: Response, next: NextFunction) => {
     const { name } = req.body;
-    const bodyValidation = await yupValidation(categorieSchema, { name });
+    const bodyValidation = await yupValidation(tagSchema, { name });
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
 
     const tag = await Tag.findById(req.params.id);
     if (!tag) {
-        return res.status(404).json({ success: false, message: 'quote not found' });
+        const error = new Error('tag not found');
+        (error as ResponseError).statusCode = 404;
+        throw error;
     }
 
     try {
@@ -75,9 +85,9 @@ const updateTag = async (req: Request, res: Response) => {
             },
             { new: true },
         );
-        return res.status(201).json({ success: true, tag });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        return responseData(res, true, 200, null, tag);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 export { createTag, getAllTag, deleteTag, updateTag, getSingleTag };

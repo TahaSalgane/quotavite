@@ -8,7 +8,12 @@ const yupValidation = async (schema: ObjectSchema<object>, obj: object) => {
         return { ok: false, error };
     }
 };
-const authSchema = yup.object({
+const loginSchema = yup.object({
+    email: yup.string().email().required(),
+    password: yup.string().required(),
+});
+const registerSchema = yup.object({
+    username: yup.string().required(),
     email: yup.string().email().required(),
     password: yup.string().required(),
 });
@@ -18,8 +23,8 @@ const quoteSchema = yup.object({
     tags: yup.array().of(yup.string()).required(),
     // tags: yup.string().required(),
 });
-const categorieSchema = yup.object({
+const tagSchema = yup.object({
     name: yup.string().required(),
 });
 export default yupValidation;
-export { authSchema, quoteSchema, categorieSchema, yupValidation };
+export { registerSchema, loginSchema, quoteSchema, tagSchema, yupValidation };

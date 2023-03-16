@@ -1,45 +1,55 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { ResponseError } from '../utils/type';
 import User from '../models/User';
-const getAllUsers = async (req: Request, res: Response) => {
+import responseData from '../utils/responseData';
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const users = await User.find();
         if (users) {
-            res.status(200).json(users);
+            return responseData(res, true, 200, null, users);
         } else {
-            res.status(403).json({ success: false, message: 'there is users' });
+            const error = new Error('user not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const getSinglUser = async (req: Request, res: Response) => {
+const getSinglUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            res.status(403).json({ success: false, message: 'user not found' });
+            const error = new Error('user not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
-        res.status(200).json(user);
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, user);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 
-const deleteUser = async (req: Request, res: Response) => {
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(404).json({ success: false, message: 'user not found' });
+            const error = new Error('user not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
         await User.findByIdAndDelete(req.params.id);
-        res.status(200).json({ success: true, message: 'user has been deleted successfully' });
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, user);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const blockUser = async (req: Request, res: Response) => {
+const blockUser = async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.findById(req.params.id);
     if (!user) {
-        return res.status(404).json({ success: false, message: 'user not found' });
+        const error = new Error('user not found');
+        (error as ResponseError).statusCode = 404;
+        throw error;
     }
     try {
         const user = await User.findByIdAndUpdate(
@@ -51,15 +61,17 @@ const blockUser = async (req: Request, res: Response) => {
             },
             { new: true },
         );
-        return res.status(201).json({ success: true, user });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        return responseData(res, true, 200, null, user);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const disabledUser = async (req: Request, res: Response) => {
+const disabledUser = async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.findById(req.params.id);
     if (!user) {
-        return res.status(404).json({ success: false, message: 'user not found' });
+        const error = new Error('user not found');
+        (error as ResponseError).statusCode = 404;
+        throw error;
     }
     try {
         const user = await User.findByIdAndUpdate(
@@ -71,9 +83,9 @@ const disabledUser = async (req: Request, res: Response) => {
             },
             { new: true },
         );
-        return res.status(201).json({ success: true, user });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        return responseData(res, true, 200, null, user);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 export { getAllUsers, getSinglUser, deleteUser, blockUser, disabledUser };

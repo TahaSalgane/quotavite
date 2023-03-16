@@ -1,26 +1,29 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-import { load } from 'cheerio';
-import axios, { AxiosResponse } from 'axios';
-import cron from 'node-cron';
 import Quote from '../models/Quotes';
+
 import responseData from '../utils/responseData';
-import { CostumeRequest } from '../utils/type';
+import { CostumeRequest, ResponseError } from '../utils/type';
 import { yupValidation, quoteSchema } from '../utils/YupValidation';
-const createQuote = async (req: Request, res: Response) => {
+
+const createQuote = async (req: Request, res: Response, next: NextFunction) => {
     const { content, author, tags } = req.body;
     const bodyValidation = await yupValidation(quoteSchema, { content, author, tags });
-    if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
+    if (!bodyValidation.ok) {
+        const error = new Error(bodyValidation.error.message);
+        (error as ResponseError).statusCode = 400;
+        throw error;
+    }
     try {
         const quote = await Quote.create({ content, author, tags });
         const freshQuote = await Quote.findById(quote._id).populate('tags').populate('likes');
-        return res.status(201).json({ success: true, realData: freshQuote });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        return responseData(res, true, 200, null, freshQuote);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 
-const getPopulaireQuotes = async (req: Request, res: Response) => {
+const getPopulaireQuotes = async (req: Request, res: Response, next: NextFunction) => {
     const PER_PAGE = 10;
     const { pageNumber, tag } = req.query;
     let quotes;
@@ -37,12 +40,13 @@ const getPopulaireQuotes = async (req: Request, res: Response) => {
         } else {
             quotes = await Quote.find({}).populate('tags').populate('likes').sort({ like: 1 });
         }
-        res.status(200).json(quotes);
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, quotes);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const getLatestQuotes = async (req: Request, res: Response) => {
+// res.sta tus(403).json({ success: false, message: error.message });
+const getLatestQuotes = async (req: Request, res: Response, next: NextFunction) => {
     const PER_PAGE = 10;
     const { pageNumber, tag } = req.query;
     let quotes;
@@ -59,63 +63,76 @@ const getLatestQuotes = async (req: Request, res: Response) => {
         } else {
             quotes = await Quote.find({}).sort({ createdAt: -1 }).populate('tags').populate('likes');
         }
-        res.status(200).json(quotes);
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, quotes);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const getSingleQuote = async (req: Request, res: Response) => {
+const getSingleQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const quote = await Quote.findById(req.params.id);
         if (!quote) {
-            res.status(403).json({ success: false, message: 'quote not found' });
+            const error = new Error('quote not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
-        res.status(200).json(quote);
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, quote);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 
-const deleteQuote = async (req: Request, res: Response) => {
+const deleteQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const quote = await Quote.findById(req.params.id);
         if (!quote) {
-            return res.status(404).json({ success: false, message: 'quote not found' });
+            const error = new Error('quote not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
         await Quote.findByIdAndDelete(req.params.id);
-        res.status(200).json({ success: true, message: 'quote has been deleted successfully' });
-    } catch (error: any) {
-        res.status(403).json({ success: false, message: error.message });
+        return responseData(res, true, 200, null, quote);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const updateQuote = async (req: Request, res: Response) => {
+const updateQuote = async (req: Request, res: Response, next: NextFunction) => {
     const quote = await Quote.findById(req.params.id);
     if (!quote) {
-        return res.status(404).json({ success: false, message: 'quote not found' });
+        const error = new Error('quote not found');
+        (error as ResponseError).statusCode = 404;
+        throw error;
     }
     const { content, author, tags } = req.body;
     const bodyValidation = await yupValidation(quoteSchema, { content, author, tags });
-    if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
+    if (!bodyValidation.ok)
+        if (!bodyValidation.ok) {
+            const error = new Error(bodyValidation.error.message);
+            (error as ResponseError).statusCode = 400;
+            throw error;
+        }
     try {
         quote.content = content;
         quote.author = author;
         quote.tags = tags;
         await quote.save();
         const freshQuote = await Quote.findById(quote._id).populate('tags').populate('likes');
-        return res.status(201).json({ success: true, realData: freshQuote });
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+        return responseData(res, true, 200, null, freshQuote);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
 
-const toggleLike = async (req: Request, res: Response) => {
+const toggleLike = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const userData = (req as CostumeRequest).userData;
     const userID = userData._id;
     try {
         const quote = await Quote.findById(id);
         if (!quote) {
-            return res.status(500).json({ success: false, message: 'quote not found' });
+            const error = new Error('quote not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
         }
         const qupteUpdateData = quote.likes.find((user: number) => user.toString() === userID)
             ? {
@@ -128,45 +145,8 @@ const toggleLike = async (req: Request, res: Response) => {
         const freshQuote = await Quote.findById(quote._id).populate('tags').populate('likes');
 
         return responseData(res, true, 200, null, freshQuote);
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
+    } catch (error: Error | ResponseError | any) {
+        next(error);
     }
 };
-const webSrapper = async (req: Request, res: Response) => {
-    try {
-        const url = 'https://www.brainyquote.com/topics/love-quotes';
-        axios
-            .get(url)
-            .then((response: AxiosResponse) => {
-                const cheerioLad = load(response.data);
-                const quotes: any[] = [];
-
-                cheerioLad('.bqQt').each((i: number, el: any) => {
-                    const quote = cheerioLad(el).find('.b-qt').text().trim();
-                    const author = cheerioLad(el).find('.bq-aut').text();
-                    console.log(author);
-                    quotes.push({ quote, author });
-                });
-                cron.schedule('1 * * * * *', () => {
-                    console.log(quotes);
-                });
-            })
-            .catch((error: Error) => {
-                console.log(error);
-            });
-        return responseData(res, true, 200, null, null);
-    } catch (error: any) {
-        return res.status(500).json({ success: false, error: error.message });
-    }
-};
-
-export {
-    createQuote,
-    getSingleQuote,
-    getLatestQuotes,
-    getPopulaireQuotes,
-    deleteQuote,
-    updateQuote,
-    toggleLike,
-    webSrapper,
-};
+export { createQuote, getSingleQuote, getLatestQuotes, getPopulaireQuotes, deleteQuote, updateQuote, toggleLike };

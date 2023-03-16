@@ -9,7 +9,6 @@ import {
     deleteQuote,
     updateQuote,
     toggleLike,
-    webSrapper,
 } from '../controllers/QuotesController';
 import checkAuth from '../middleware/checkAuth';
 
@@ -20,6 +19,5 @@ router.get('/:id', getSingleQuote);
 router.delete('/:id', deleteQuote);
 router.put('/:id', updateQuote);
 router.put('/like/:id', checkAuth, toggleLike);
-router.get('/test/webscrapper', webSrapper);
 
 export default router;
