@@ -4,7 +4,7 @@ import User from '../models/User';
 import responseData from '../utils/responseData';
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await User.find();
+        const users = await User.find({ isAdmin: false });
         if (users) {
             return responseData(res, true, 200, null, users);
         } else {
@@ -56,7 +56,7 @@ const blockUser = async (req: Request, res: Response, next: NextFunction) => {
             req.params.id,
             {
                 $set: {
-                    status: -2,
+                    status: -1,
                 },
             },
             { new: true },
@@ -78,7 +78,7 @@ const disabledUser = async (req: Request, res: Response, next: NextFunction) => 
             req.params.id,
             {
                 $set: {
-                    status: -1,
+                    status: 0,
                 },
             },
             { new: true },
@@ -88,4 +88,26 @@ const disabledUser = async (req: Request, res: Response, next: NextFunction) => 
         next(error);
     }
 };
-export { getAllUsers, getSinglUser, deleteUser, blockUser, disabledUser };
+const activerUser = async (req: Request, res: Response, next: NextFunction) => {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+        const error = new Error('user not found');
+        (error as ResponseError).statusCode = 404;
+        throw error;
+    }
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+                $set: {
+                    status: 1,
+                },
+            },
+            { new: true },
+        );
+        return responseData(res, true, 200, null, user);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
+    }
+};
+export { getAllUsers, getSinglUser, deleteUser, blockUser, disabledUser, activerUser };
