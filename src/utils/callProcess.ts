@@ -2,7 +2,7 @@ import { CronJob } from 'cron';
 
 const callProcess = () => {
     new CronJob(
-        '* 1 * * *',
+        '* 2 * * *',
         () => {
             process && process.send && process.send?.('scrapper');
         },

@@ -24,46 +24,55 @@ const createQuote = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getPopulaireQuotes = async (req: Request, res: Response, next: NextFunction) => {
-    const PER_PAGE = 10;
-    const { pageNumber, tag } = req.query;
-    let quotes;
+    // const PER_PAGE = 10;
+    // const page = req.query.skip ?? 1;
+    // const skipnum = (+page - 1) * PER_PAGE;
+    // try {
+    //     // const quotes = await Quote.find().populate('tags').populate('likes').skip(skipnum).limit(PER_PAGE);
+    //     const quotes = await Quote.find({})
+    //         .sort({ likes: -1, _id: 1 })
+    //         .skip(skipnum)
+    //         .populate('tags')
+    //         .populate('likes')
+    //         .limit(PER_PAGE);
+    //     return responseData(res, true, 200, null, quotes);
+    // } catch (error: Error | ResponseError | any) {
+    //     next(error);
+    // }
+    const perPage = 10;
+    const page = req.query.page || 1;
+    const skip = (+page - 1) * perPage;
     try {
-        if (pageNumber) {
-            quotes = await Quote.find()
-                .populate('tags')
-                .populate('likes')
-                .skip((+pageNumber - 1) * PER_PAGE)
-                .limit(PER_PAGE)
-                .sort({ like: 1 });
-        } else if (tag) {
-            quotes = await Quote.find({ tags: tag }).populate('tags').populate('likes').sort({ like: 1 });
-        } else {
-            quotes = await Quote.find({}).populate('tags').populate('likes').sort({ like: 1 });
-        }
-        return responseData(res, true, 200, null, quotes);
+        await Quote.find({})
+            .sort({ likes: -1, _id: 1 })
+            .skip(skip)
+            .populate('tags')
+            .populate('likes')
+            .limit(perPage)
+            .lean()
+            .then((quotes: any) => {
+                return responseData(res, true, 200, null, quotes);
+            });
     } catch (error: Error | ResponseError | any) {
         next(error);
     }
 };
 // res.sta tus(403).json({ success: false, message: error.message });
 const getLatestQuotes = async (req: Request, res: Response, next: NextFunction) => {
-    const PER_PAGE = 10;
-    const { pageNumber, tag } = req.query;
-    let quotes;
+    const perPage = 10;
+    const page = req.query.page || 1;
+    const skip = (+page - 1) * perPage;
     try {
-        if (pageNumber) {
-            quotes = await Quote.find()
-                .skip((-pageNumber - 1) * PER_PAGE)
-                .limit(PER_PAGE)
-                .populate('tags')
-                .populate('likes')
-                .sort({ createdAt: -1 });
-        } else if (tag) {
-            quotes = await Quote.find({ tags: tag }).sort({ createdAt: -1 }).populate('tags').populate('likes');
-        } else {
-            quotes = await Quote.find({}).sort({ createdAt: -1 }).populate('tags').populate('likes');
-        }
-        return responseData(res, true, 200, null, quotes);
+        await Quote.find({})
+            .sort({ createdAt: 1, _id: 1 })
+            .skip(skip)
+            .populate('tags')
+            .populate('likes')
+            .limit(perPage)
+            .lean()
+            .then((quotes: any) => {
+                return responseData(res, true, 200, null, quotes);
+            });
     } catch (error: Error | ResponseError | any) {
         next(error);
     }
