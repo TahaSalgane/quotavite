@@ -38,9 +38,18 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     if (!bodyValidation.ok) return res.json(bodyValidation.error.message);
     try {
         const user = await User.findOne({ email }).select('+password');
-
         if (!user) {
             const error = new Error('invalid credentials');
+            (error as ResponseError).statusCode = 400;
+            throw error;
+        }
+        if (user.status === -1) {
+            const error = new Error('this user is banned');
+            (error as ResponseError).statusCode = 400;
+            throw error;
+        }
+        if (user.status === 0) {
+            const error = new Error('this user is desactived');
             (error as ResponseError).statusCode = 400;
             throw error;
         }

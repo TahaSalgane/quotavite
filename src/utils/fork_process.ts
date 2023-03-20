@@ -12,7 +12,8 @@ const fokeProcess = () => {
             console.log('******************** scapper start ********************');
             //
             await brainQuoteWebScrapper('love');
-            //
+            await brainQuoteWebScrapper('jealousy');
+            //jealousy
             console.log('******************** scapper  end  ********************');
         }
     });
