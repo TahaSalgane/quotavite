@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
-import Quote from '../models/Quotes';
+import Quote, { QuoteInterface } from '../models/Quotes';
+import Tag, { TagInterface } from '../models/Tags';
 
 import responseData from '../utils/responseData';
 import { CostumeRequest, ResponseError } from '../utils/type';
@@ -41,18 +42,52 @@ const getPopulaireQuotes = async (req: Request, res: Response, next: NextFunctio
     // }
     const perPage = 10;
     const page = req.query.page || 1;
+    const tag = req.query.tag;
     const skip = (+page - 1) * perPage;
     try {
-        await Quote.find({})
-            .sort({ likes: -1, _id: 1 })
-            .skip(skip)
-            .populate('tags')
-            .populate('likes')
-            .limit(perPage)
-            .lean()
-            .then((quotes: any) => {
-                return responseData(res, true, 200, null, quotes);
-            });
+        if (tag) {
+            Tag.findOne({ name: tag })
+                .then((tag: TagInterface | null) => {
+                    if (!tag) {
+                        const error = new Error('tag not found');
+                        (error as ResponseError).statusCode = 400;
+                        throw error;
+                    }
+                    Quote.find({ tags: tag._id })
+                        .populate('tags')
+                        .sort({ createdAt: 1, _id: 1 })
+                        .skip(skip)
+                        .populate('tags')
+                        .populate('likes')
+                        .limit(perPage)
+                        .lean()
+                        .then((quotes: QuoteInterface[]) => {
+                            return responseData(res, true, 200, null, quotes);
+                        })
+                        .catch((error: any) => {
+                            console.log(error);
+                        });
+                })
+                .catch((error: any) => {
+                    const errorr = new Error(error.message);
+                    (error as ResponseError).statusCode = 400;
+                    throw errorr;
+                });
+        } else if (page) {
+            await Quote.find({})
+                .sort({ likes: -1, _id: 1 })
+                .skip(skip)
+                .populate('tags')
+                .populate('likes')
+                .limit(perPage)
+                .lean()
+                .then((quotes: any) => {
+                    return responseData(res, true, 200, null, quotes);
+                });
+        } else {
+            const quotes = await Quote.find({});
+            return responseData(res, true, 200, null, quotes);
+        }
     } catch (error: Error | ResponseError | any) {
         next(error);
     }

@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-interface Quote {
+export interface QuoteInterface {
     content: string;
     author: string;
     likes: string[];
@@ -7,7 +7,7 @@ interface Quote {
     likes_count: number;
 }
 
-const QuoteSchema = new Schema<Quote>(
+const QuoteSchema = new Schema<QuoteInterface>(
     {
         content: {
             type: String,

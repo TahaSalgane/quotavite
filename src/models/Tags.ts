@@ -1,8 +1,9 @@
-import { Schema, model } from 'mongoose';
-interface tag {
+import { Schema, model, Document } from 'mongoose';
+
+export interface TagInterface extends Document {
     name: string;
 }
-const TagSchema = new Schema<tag>({
+const TagSchema = new Schema<TagInterface>({
     name: {
         type: String,
         unique: true,
