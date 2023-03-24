@@ -22,8 +22,23 @@ const quoteSchema = yup.object({
     author: yup.string().required(),
     tags: yup.array().of(yup.string()).required(),
 });
+const createCommentSchema = yup.object({
+    quoteId: yup.string().required(),
+    text: yup.string().required(),
+});
+const updateCommmentSchema = yup.object({
+    text: yup.string().required(),
+});
 const tagSchema = yup.object({
     name: yup.string().required(),
 });
 export default yupValidation;
-export { registerSchema, loginSchema, quoteSchema, tagSchema, yupValidation };
+export {
+    registerSchema,
+    loginSchema,
+    quoteSchema,
+    tagSchema,
+    yupValidation,
+    createCommentSchema,
+    updateCommmentSchema,
+};

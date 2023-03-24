@@ -30,9 +30,13 @@ const QuoteSchema = new Schema<QuoteInterface>(
             },
         ],
     },
-    { timestamps: true },
+    { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
-
+QuoteSchema.virtual('comments', {
+    ref: 'Comment',
+    foreignField: 'quoteId',
+    localField: '_id',
+});
 const Quote: any = model('Quote', QuoteSchema);
 
 export default Quote;

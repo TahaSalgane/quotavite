@@ -25,21 +25,6 @@ const createQuote = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getPopulaireQuotes = async (req: Request, res: Response, next: NextFunction) => {
-    // const PER_PAGE = 10;
-    // const page = req.query.skip ?? 1;
-    // const skipnum = (+page - 1) * PER_PAGE;
-    // try {
-    //     // const quotes = await Quote.find().populate('tags').populate('likes').skip(skipnum).limit(PER_PAGE);
-    //     const quotes = await Quote.find({})
-    //         .sort({ likes: -1, _id: 1 })
-    //         .skip(skipnum)
-    //         .populate('tags')
-    //         .populate('likes')
-    //         .limit(PER_PAGE);
-    //     return responseData(res, true, 200, null, quotes);
-    // } catch (error: Error | ResponseError | any) {
-    //     next(error);
-    // }
     const perPage = 10;
     const page = req.query.page || 1;
     const tag = req.query.tag;
@@ -114,7 +99,7 @@ const getLatestQuotes = async (req: Request, res: Response, next: NextFunction) 
 };
 const getSingleQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const quote = await Quote.findById(req.params.id);
+        const quote = await Quote.findById(req.params.id).populate('comments');
         if (!quote) {
             const error = new Error('quote not found');
             (error as ResponseError).statusCode = 404;

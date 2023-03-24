@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import quoteRoutes from './routes/quote';
 import tagsRoute from './routes/tags';
 import usersRoute from './routes/users';
+import commentRoutes from './routes/comments';
 import corsOptionsDelegate from './middleware/Cors';
 
 import ForkProcess from './utils/fork_process';
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/tags', tagsRoute);
 app.use('/api/users', usersRoute);
+app.use('/api/comment', commentRoutes);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use(ErrorHanlder);
