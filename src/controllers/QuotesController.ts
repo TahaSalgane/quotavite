@@ -99,7 +99,7 @@ const getLatestQuotes = async (req: Request, res: Response, next: NextFunction) 
 };
 const getSingleQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const quote = await Quote.findById(req.params.id).populate('comments');
+        const quote = await Quote.findById(req.params.id).populate('comments').populate('tags').populate('likes');
         if (!quote) {
             const error = new Error('quote not found');
             (error as ResponseError).statusCode = 404;
