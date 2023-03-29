@@ -5,7 +5,7 @@ import User from '../models/User';
 import responseData from '../utils/responseData';
 
 import { CostumeRequest, ResponseError } from '../utils/type';
-import { yupValidation, createCommentSchema } from '../utils/YupValidation';
+// import { yupValidation, createCommentSchema } from '../utils/YupValidation';
 
 const createComment = async (req: Request, res: Response, next: NextFunction) => {
     const { quoteId, text } = req.body;
@@ -13,20 +13,20 @@ const createComment = async (req: Request, res: Response, next: NextFunction) =>
     const userID = userData._id;
     const profile: any = await User.findById(userID);
 
-    const bodyValidation = await yupValidation(createCommentSchema, {
-        quoteId,
-        text,
-    });
-    if (!bodyValidation.ok) {
-        const error = new Error(bodyValidation.error.message);
-        (error as ResponseError).statusCode = 400;
-        throw error;
-    }
+    // const bodyValidation = await yupValidation(createCommentSchema, {
+    //     quoteId,
+    //     text,
+    // });
+    // if (!bodyValidation.ok) {
+    //     const error = new Error(bodyValidation.error.message);
+    //     (error as ResponseError).statusCode = 200;
+    //     throw error;
+    // }
     try {
         const createdComment: CommentInterface = await Comment.create({
-            quoteId,
             text,
-            user: userID,
+            quoteId,
+            user: userData,
             username: profile.username,
         });
         return responseData(res, true, 200, null, createdComment);
@@ -64,6 +64,7 @@ const deleteComment = async (req: Request, res: Response, next: NextFunction) =>
 const updateComment = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const comment = await Comment.findById(req.params.id);
+        const { text } = req.body;
         if (!comment) {
             const error = new Error('comment not found');
             (error as ResponseError).statusCode = 404;
@@ -73,8 +74,11 @@ const updateComment = async (req: Request, res: Response, next: NextFunction) =>
         if (userData._id != comment.user.toString()) {
             return responseData(res, true, 403, null, '"access denied, only user himself can edit his comment"');
         }
-        const updateComment = await Comment.findByIdAndUpdate(req.params.id, { $set: { text: req.body.text } });
-        return responseData(res, true, 200, null, updateComment);
+        comment.text = text;
+        await comment.save();
+        const freshQuote = await Comment.findById(comment._id);
+        // const updateComment = await Comment.findByIdAndUpdate(req.params.id, { $set: { text: req.body.text } });
+        return responseData(res, true, 200, null, freshQuote);
     } catch (error: Error | ResponseError | any) {
         next(error);
     }
