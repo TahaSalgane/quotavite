@@ -99,7 +99,13 @@ const getLatestQuotes = async (req: Request, res: Response, next: NextFunction) 
 };
 const getSingleQuote = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const quote = await Quote.findById(req.params.id).populate('comments').populate('tags').populate('likes');
+        const quote = await Quote.findById(req.params.id)
+            .populate({
+                path: 'comments',
+                options: { sort: { createdAt: -1 } }, // sort by descending order of createdAt
+            })
+            .populate('tags')
+            .populate('likes');
         if (!quote) {
             const error = new Error('quote not found');
             (error as ResponseError).statusCode = 404;
@@ -178,4 +184,28 @@ const toggleLike = async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 };
-export { createQuote, getSingleQuote, getLatestQuotes, getPopulaireQuotes, deleteQuote, updateQuote, toggleLike };
+const getAllOfQuotes = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log((req as CostumeRequest).userData);
+        const quote = await Quote.find();
+        if (quote) {
+            return responseData(res, true, 200, null, quote);
+        } else {
+            const error = new Error('tags not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
+        }
+    } catch (error: Error | ResponseError | any) {
+        next(error);
+    }
+};
+export {
+    createQuote,
+    getSingleQuote,
+    getLatestQuotes,
+    getPopulaireQuotes,
+    deleteQuote,
+    updateQuote,
+    toggleLike,
+    getAllOfQuotes,
+};

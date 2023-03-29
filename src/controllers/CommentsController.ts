@@ -36,7 +36,7 @@ const createComment = async (req: Request, res: Response, next: NextFunction) =>
 };
 const getAllComent = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const comment = await Comment.find().populate('user');
+        const comment = await Comment.find().sort({ createdAt: 1 }).populate('user');
         return responseData(res, true, 200, null, comment);
     } catch (error: Error | ResponseError | any) {
         next(error);

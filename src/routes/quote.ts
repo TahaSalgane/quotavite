@@ -9,12 +9,14 @@ import {
     deleteQuote,
     updateQuote,
     toggleLike,
+    getAllOfQuotes,
 } from '../controllers/QuotesController';
 import checkAuth from '../middleware/checkAuth';
 
 router.post('/', createQuote);
 router.get('/', getPopulaireQuotes);
 router.get('/latest', getLatestQuotes);
+router.get('/quotes', getAllOfQuotes);
 router.get('/:id', getSingleQuote);
 router.delete('/:id', deleteQuote);
 router.put('/:id', updateQuote);
