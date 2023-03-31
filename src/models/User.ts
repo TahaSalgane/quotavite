@@ -31,7 +31,7 @@ const UserSchema = new Schema<UserInterface>({
     resetPasswordExpire: Date,
     status: {
         type: Number,
-        default: 1,
+        default: 0,
     },
 });
 

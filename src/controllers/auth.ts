@@ -5,7 +5,9 @@ import jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { ResponseError, UserDataInterface } from '../utils/type';
 import responseData from '../utils/responseData';
-
+import VerificationToken from '../models/VerificationToken';
+import crypto from 'crypto';
+import sendEmail from '../utils/sendEmail';
 const secret = process.env.SECRET_OR_KEY_JWT ?? '';
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
@@ -27,7 +29,20 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         }
         const passwordHashed = await bcrypt.hash(password, 10);
         const user = await User.create({ username, email, password: passwordHashed });
-        return responseData(res, true, 200, null, user);
+        console.log(user.email);
+        const verificationToken = new VerificationToken({
+            userId: user._id,
+            token: crypto.randomBytes(32).toString('hex'),
+        });
+        await verificationToken.save();
+        const link = `http://localhost:3000/users/${user._id}/verify/${verificationToken.token}`;
+        const htmlTemplate = `
+            <div>
+            <p>Click on the link below to verify your email</p>
+            <a href="${link}">Verify</a>
+            </div>`;
+        await sendEmail(user.email, 'Verify Your Email', htmlTemplate);
+        return responseData(res, true, 200, null, 'we sent to you an email , please verify your email adresse ');
     } catch (error: Error | ResponseError | any) {
         next(error);
     }
@@ -49,9 +64,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             throw error;
         }
         if (user.status === 0) {
-            const error = new Error('this user is desactived');
-            (error as ResponseError).statusCode = 400;
-            throw error;
+            return responseData(res, true, 400, null, 'we sent to you an email , please verify your email adresse ');
         }
         await bcrypt.compare(password, user?.password, function (err: any, ismatch: any) {
             if (err) {
@@ -76,4 +89,28 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 };
-export { login, register };
+const verifyUserAccount = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return responseData(res, true, 200, null, 'invalid link');
+        }
+        const verificationToken = await VerificationToken.findOne({
+            userId: user._id,
+            token: req.params.token,
+        });
+        if (!verificationToken) {
+            return responseData(res, true, 200, null, 'invalid link');
+        }
+        user.status = 1;
+        await user.save();
+
+        await VerificationToken.deleteOne();
+
+        return responseData(res, true, 200, null, 'your account verified');
+    } catch (error: Error | ResponseError | any) {
+        next(error);
+    }
+};
+
+export { login, register, verifyUserAccount };
