@@ -22,6 +22,12 @@ const quoteSchema = yup.object({
     author: yup.string().required(),
     tags: yup.array().of(yup.string()).required(),
 });
+const resetPassword = yup.object().shape({
+    password: yup.string().min(5, 'Must be 5 characters or more').required('required'),
+});
+const validateEmail = yup.object().shape({
+    email: yup.string().email().required(),
+});
 const createCommentSchema = yup.object({
     quoteId: yup.string().required(),
     text: yup.string().required(),
@@ -41,4 +47,6 @@ export {
     yupValidation,
     createCommentSchema,
     updateCommmentSchema,
+    resetPassword,
+    validateEmail,
 };

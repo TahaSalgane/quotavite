@@ -64,8 +64,28 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             throw error;
         }
         if (user.status === 0) {
-            return responseData(res, true, 400, null, 'we sent to you an email , please verify your email adresse ');
+            let verificationToken = await VerificationToken.findOne({
+                userId: user._id,
+            });
+            if (!verificationToken) {
+                verificationToken = new VerificationToken({
+                    userId: user._id,
+                    token: crypto.randomBytes(32).toString('hex'),
+                });
+            }
+            await verificationToken.save();
+            const link = `http://localhost:3000/users/${user._id}/verify/${verificationToken.token}`;
+            const htmlTemplate = `
+                        <div>
+                        <p>Click on the link below to verify your email</p>
+                        <a href="${link}">Verify</a>
+                        </div>`;
+            await sendEmail(user.email, 'Verify Your Email', htmlTemplate);
+            const error = new Error('verify your email');
+            (error as ResponseError).statusCode = 400;
+            throw error;
         }
+
         await bcrypt.compare(password, user?.password, function (err: any, ismatch: any) {
             if (err) {
                 const error = new Error('invalid credentials');
