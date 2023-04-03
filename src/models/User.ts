@@ -8,32 +8,35 @@ interface UserInterface {
     status: number;
     isAdmin: boolean;
 }
-const UserSchema = new Schema<UserInterface>({
-    username: {
-        type: String,
-        required: [true, 'please provide a username'],
+const UserSchema = new Schema<UserInterface>(
+    {
+        username: {
+            type: String,
+            required: [true, 'please provide a username'],
+        },
+        email: {
+            type: String,
+            required: [true, 'please provide a email'],
+        },
+        password: {
+            type: String,
+            require: [true, 'please add a password'],
+            minlength: 6,
+            select: false,
+        },
+        isAdmin: {
+            type: Boolean,
+            default: false,
+        },
+        resetPasswordToken: String,
+        resetPasswordExpire: Date,
+        status: {
+            type: Number,
+            default: 0,
+        },
     },
-    email: {
-        type: String,
-        required: [true, 'please provide a email'],
-    },
-    password: {
-        type: String,
-        require: [true, 'please add a password'],
-        minlength: 6,
-        select: false,
-    },
-    isAdmin: {
-        type: Boolean,
-        default: false,
-    },
-    resetPasswordToken: String,
-    resetPasswordExpire: Date,
-    status: {
-        type: Number,
-        default: 0,
-    },
-});
+    { timestamps: true },
+);
 
 const User = model('User', UserSchema);
 
