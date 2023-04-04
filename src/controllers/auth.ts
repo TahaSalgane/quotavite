@@ -113,14 +113,18 @@ const verifyUserAccount = async (req: Request, res: Response, next: NextFunction
     try {
         const user = await User.findById(req.params.userId);
         if (!user) {
-            return responseData(res, true, 200, null, 'invalid link');
+            const error = new Error('invalid link');
+            (error as ResponseError).statusCode = 400;
+            throw error;
         }
         const verificationToken = await VerificationToken.findOne({
             userId: user._id,
             token: req.params.token,
         });
         if (!verificationToken) {
-            return responseData(res, true, 200, null, 'invalid link');
+            const error = new Error('invalid link');
+            (error as ResponseError).statusCode = 400;
+            throw error;
         }
         user.status = 1;
         await user.save();
