@@ -186,11 +186,14 @@ const toggleLike = async (req: Request, res: Response, next: NextFunction) => {
 };
 const getAllOfQuotes = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const query = req.query.q as string;
-        const results: QuoteInterface[] = await Quote.find({
-            content: { $regex: new RegExp(`^${query}`, 'i') },
-        }).limit(10);
-        return responseData(res, true, 200, null, results);
+        const quotes = await Quote.find();
+        if (quotes) {
+            return responseData(res, true, 200, null, quotes);
+        } else {
+            const error = new Error('tags not found');
+            (error as ResponseError).statusCode = 404;
+            throw error;
+        }
     } catch (error: Error | ResponseError | any) {
         next(error);
     }
