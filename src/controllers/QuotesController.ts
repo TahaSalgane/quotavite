@@ -186,15 +186,20 @@ const toggleLike = async (req: Request, res: Response, next: NextFunction) => {
 };
 const getAllOfQuotes = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        console.log((req as CostumeRequest).userData);
-        const quote = await Quote.find();
-        if (quote) {
-            return responseData(res, true, 200, null, quote);
-        } else {
-            const error = new Error('tags not found');
-            (error as ResponseError).statusCode = 404;
-            throw error;
-        }
+        const query = req.query.q as string;
+        const results: QuoteInterface[] = await Quote.find({
+            content: { $regex: new RegExp(`^${query}`, 'i') },
+        }).limit(10);
+        return responseData(res, true, 200, null, results);
+    } catch (error: Error | ResponseError | any) {
+        next(error);
+    }
+};
+const searchQuoteController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const query = req.query.q;
+        const results = await Quote.search(query);
+        return responseData(res, true, 200, null, results);
     } catch (error: Error | ResponseError | any) {
         next(error);
     }
@@ -208,4 +213,5 @@ export {
     updateQuote,
     toggleLike,
     getAllOfQuotes,
+    searchQuoteController,
 };
