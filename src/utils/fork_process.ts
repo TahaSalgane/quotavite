@@ -21,6 +21,15 @@ const fokeProcess = () => {
             await brainQuoteWebScrapper('Attitude');
             await brainQuoteWebScrapper('Friendship');
             await brainQuoteWebScrapper('Alone');
+            await brainQuoteWebScrapper('faith');
+            await brainQuoteWebScrapper('Fear');
+            await brainQuoteWebScrapper('travel');
+            await brainQuoteWebScrapper('Truth');
+            await brainQuoteWebScrapper('Intelligence');
+            await brainQuoteWebScrapper('Amazing');
+            await brainQuoteWebScrapper('Respect');
+            await brainQuoteWebScrapper('Sports');
+
             //jealousy
             console.log('******************** scapper  end  ********************');
         }

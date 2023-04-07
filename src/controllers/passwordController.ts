@@ -29,7 +29,11 @@ const sendResetPasswordLink = async (req: Request, res: Response, next: NextFunc
             await verificationToken.save();
         }
         const link = `http://localhost:3000/reset-password/${user._id}/${verificationToken.token}`;
-        const htmlTemplate = `<a href="${link}">click here to reset your password</a>`;
+        const htmlTemplate = `    <p>Dear User,</p>
+        <p>Please click on the following link to reset your password:</p>
+        <p><a href="${link}" style="padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Click here to reset your password</a></p>
+        <p>If you did not request a password reset, please ignore this email.</p>
+        <p>Best regards,</p>`;
         await sendEmail(user.email, 'reset password', htmlTemplate);
         return responseData(res, true, 200, null, 'Password reset link sent to your email,Please check your inbox');
     } catch (error: Error | ResponseError | any) {
